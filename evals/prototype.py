@@ -1,6 +1,11 @@
 import torch
 import torch.nn.functional as F
+"""
+References: https://github.com/tristandeleu/pytorch-meta
 
+Credit to: Tristan Deleu
+
+"""
 __all__ = ['get_num_samples', 'get_prototypes', 'prototypical_loss']
 
 
