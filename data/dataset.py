@@ -1,7 +1,7 @@
 import torch
 from torchvision import transforms
 
-from torchmeta.transforms import ClassSplitter, Categorical
+# from torchmeta.transforms import ClassSplitter, Categorical
 
 from data.income import Income
 

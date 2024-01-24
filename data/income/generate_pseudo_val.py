@@ -17,7 +17,7 @@ val_x = x[val_idx]
 np.save('train_x.npy', train_x)
 np.save('val_x.npy', val_x)
 
-model = KMeans(n_clusters = 2)
+model = KMeans(n_clusters = 2, n_init='auto')
 model.fit(val_x)
 labels = model.predict(val_x)
 np.save('pseudo_val_y.npy', labels)

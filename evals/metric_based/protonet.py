@@ -1,6 +1,6 @@
 import torch
 
-from torchmeta.utils.prototype import get_prototypes
+from evals.prototype import get_prototypes
 
 from train.metric_based import get_accuracy
 from utils import MetricLogger

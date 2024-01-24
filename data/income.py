@@ -1,7 +1,7 @@
-from re import I
+# from re import I
 import numpy as np
 import torch
-import os
+# import os
 import copy
 import faiss
 
@@ -18,7 +18,7 @@ class Income(object):
         self.test_x = np.load('./data/income/xtest.npy')
         self.test_y = np.load('./data/income/ytest.npy')
         self.val_x = np.load('./data/income/val_x.npy')
-        self.val_y = np.load('./data/income/val_y.npy') # val_y is given from pseudo-validaiton scheme with STUNT
+        self.val_y = np.load('./data/income/pseudo_val_y.npy') # val_y is given from pseudo-validaiton scheme with STUNT
         self.test_num_way = test_num_way
         self.test_rng = np.random.RandomState(seed)
         self.val_rng = np.random.RandomState(seed)
