@@ -46,9 +46,9 @@ def test_classifier(P, model, loader, criterion, steps, logger=None):
 
         prototypes = get_prototypes(train_embeddings, train_targets, num_ways)
 
-        squared_distances = torch.sum((prototypes.unsqueeze(2)
-                                    - test_embeddings.unsqueeze(1)) ** 2, dim=-1)
-        loss = criterion(-squared_distances, test_targets)
+        manhattan_distances = torch.sum(torch.abs(prototypes.unsqueeze(2)
+                                    - test_embeddings.unsqueeze(1)), dim=-1)
+        loss = criterion(-manhattan_distances, test_targets)
 
         acc = get_accuracy(prototypes, test_embeddings, test_targets).item()
 

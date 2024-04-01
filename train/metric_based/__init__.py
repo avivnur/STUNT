@@ -19,7 +19,9 @@ def get_accuracy(prototypes, embeddings, targets):
     accuracy : `torch.FloatTensor` instance
         Mean accuracy on the query points.
     """
-    sq_distances = torch.sum((prototypes.unsqueeze(1)
-        - embeddings.unsqueeze(2)) ** 2, dim=-1)
-    _, predictions = torch.min(sq_distances, dim=-1)
+    
+    # Calculate Manhattan (L1) distances
+    manhattan_distances = torch.sum(torch.abs(prototypes.unsqueeze(1) 
+                                              - embeddings.unsqueeze(2)), dim=-1)
+    _, predictions = torch.min(manhattan_distances, dim=-1)
     return torch.mean(predictions.eq(targets).float()) * 100.

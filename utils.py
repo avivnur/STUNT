@@ -428,3 +428,21 @@ class MetricLogger(object):
         total_time_str = str(datetime.datetime.timedelta(seconds=int(total_time)))
         print('{} Total time: {} ({:.4f} s / it)'.format(
             header, total_time_str, total_time / len(iterable)))
+
+def interleave(*arrays):
+    # Calculate the total size of the new array
+    total_size = sum(arr.size for arr in arrays)
+
+    # Initialize an empty array of the appropriate size
+    # For dtype, we're assuming all arrays have the same dtype
+    c = np.empty(total_size, dtype=arrays[0].dtype)
+
+    # Fill in the elements from each array in turn
+    index = 0
+    for i in range(max(arr.size for arr in arrays)):
+        for arr in arrays:
+            if i < arr.size:
+                c[index] = arr[i]
+                index += 1
+
+    return c

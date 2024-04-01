@@ -3,7 +3,7 @@ import numpy as np
 import torch
 # import os
 import copy
-import faiss
+from sklearn_extra.cluster import CLARA
 
 class Income(object):
     def __init__(self, tabular_size, seed, source, shot, tasks_per_batch, test_num_way, query):
@@ -14,10 +14,10 @@ class Income(object):
         self.shot = shot
         self.query = query
         self.tasks_per_batch = tasks_per_batch
-        self.unlabeled_x = np.load('./data/income/train_x.npy')
-        self.test_x = np.load('./data/income/xtest.npy')
-        self.test_y = np.load('./data/income/ytest.npy')
-        self.val_x = np.load('./data/income/val_x.npy')
+        self.unlabeled_x = np.load('./data/income/x_train.npy').astype(np.float16)
+        self.test_x = np.load('./data/income/x_test.npy').astype(np.float16)
+        self.test_y = np.load('./data/income/y_test.npy')
+        self.val_x = np.load('./data/income/x_val.npy').astype(np.float16)
         self.val_y = np.load('./data/income/pseudo_val_y.npy') # val_y is given from pseudo-validaiton scheme with STUNT
         self.test_num_way = test_num_way
         self.test_rng = np.random.RandomState(seed)
@@ -91,10 +91,8 @@ class Income(object):
                     col = np.random.choice(range(min_col, max_col), 1, replace = False)[0]
                     task_idx = np.random.choice([i for i in range(x.shape[1])], col, replace = False)
                     masked_x = np.ascontiguousarray(x[:, task_idx], dtype = np.float32)
-                    kmeans = faiss.Kmeans(masked_x.shape[1], num_way, niter=20, nredo=1, verbose=False, min_points_per_centroid = self.shot + self.query, gpu=1)
-                    kmeans.train(masked_x)
-                    D, I = kmeans.index.search(masked_x, 1)
-                    y = I[:,0].astype(np.int32)
+                    km = CLARA(n_clusters=num_way, metric="manhattan", random_state=0).fit(masked_x)
+                    y = km.predict(masked_x)
                     class_list, counts = np.unique(y, return_counts = True)
                     min_count = min(counts)
                     

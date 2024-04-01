@@ -10,7 +10,7 @@ from utils import MetricLogger, save_checkpoint, save_checkpoint_step
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
-def meta_trainer(P, train_func, test_func, model, optimizer, train_loader, test_loader, logger):
+def meta_trainer(P, train_func, test_func, model, optimizer, train_loader, test_loader, logger, patience=500):
     kwargs = {}
     kwargs_test = {}
 
@@ -24,7 +24,11 @@ def meta_trainer(P, train_func, test_func, model, optimizer, train_loader, test_
 
     """ training start """
     logger.log_dirname(f"Start training")
+    steps_without_improvement = 0
     for step in range(start_step, P.outer_steps + 1):
+        if steps_without_improvement >= patience:  # Check for early stopping
+            logger.log(f'Early stopping triggered at step {step} due to no improvement in {patience} steps.')
+            break  # Exit the training loop
 
         stime = time.time()
         train_batch = next(train_loader)
@@ -39,8 +43,11 @@ def meta_trainer(P, train_func, test_func, model, optimizer, train_loader, test_
  
             if best < acc:
                 best = acc
+                steps_without_improvement = 0  # Reset counter after improvement
                 save_checkpoint(P, step, best, model.state_dict(),
                                 optimizer.state_dict(), logger.logdir, is_best=True)
+            else:
+                steps_without_improvement += 1
 
             logger.scalar_summary('eval/best_acc', best, step)
             logger.log('[EVAL] [Step %3d] [Acc %5.2f] [Best %5.2f]' % (step, acc, best))

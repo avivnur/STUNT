@@ -1,5 +1,5 @@
 import torch
-from torchmeta.utils.prototype import get_prototypes
+from evals.prototype import get_prototypes
 from train.metric_based import get_accuracy
 from utils import MetricLogger
 import numpy as np
@@ -15,8 +15,33 @@ parser.add_argument('--seed', default = 0, type = int)
 args = parser.parse_args()
 
 if args.data_name == 'income':
-    input_size = 105
+    input_size = 115
     output_size = 2
+    hidden_dim = 1024
+
+elif args.data_name == 'cancellation':
+    input_size = 23
+    output_size = 2
+    hidden_dim = 1024
+
+elif args.data_name == 'nps':
+    input_size = 24
+    output_size = 3
+    hidden_dim = 1024
+
+elif args.data_name == 'drybean':
+    input_size = 22
+    output_size = 7
+    hidden_dim = 1024
+
+elif args.data_name == 'covtype':
+    input_size = 62
+    output_size = 7
+    hidden_dim = 1024
+
+elif args.data_name == 'wine':
+    input_size = 17
+    output_size = 3
     hidden_dim = 1024
 
 class MLPProto(nn.Module):
@@ -40,10 +65,10 @@ class MLPProto(nn.Module):
 model = MLPProto(input_size, hidden_dim, hidden_dim)
 model.load_state_dict(torch.load(args.load_path))
 
-train_x = np.load('./data/'+args.data_name+'/xtrain.npy')
-train_y = np.load('./data/'+args.data_name+'/ytrain.npy')
-test_x = np.load('./data/'+args.data_name+'/xtest.npy')
-test_y = np.load('./data/'+args.data_name+'/ytest.npy')
+train_x = np.load('./data/'+args.data_name+'/x_train.npy')
+train_y = np.load('./data/'+args.data_name+'/y_train.npy')
+test_x = np.load('./data/'+args.data_name+'/x_test.npy')
+test_y = np.load('./data/'+args.data_name+'/y_test.npy')
 train_idx = np.load('./data/'+args.data_name+'/index{}/train_idx_{}.npy'.format(args.shot_num, args.seed))
 
 few_train = model(torch.tensor(train_x[train_idx]).float())
@@ -55,9 +80,10 @@ query_y = test_y
 
 def get_accuracy(prototypes, embeddings, targets):
 
-    sq_distances = torch.sum((prototypes.unsqueeze(1)
-        - embeddings.unsqueeze(2)) ** 2, dim=-1)
-    _, predictions = torch.min(sq_distances, dim=-1)
+    # Calculate Manhattan (L1) distances
+    manhattan_distances = torch.sum(torch.abs(prototypes.unsqueeze(1) 
+                                              - embeddings.unsqueeze(2)), dim=-1)
+    _, predictions = torch.min(manhattan_distances, dim=-1)
     return torch.mean(predictions.eq(targets).float()) * 100.
 
 train_x = torch.tensor(support_x.astype(np.float32)).unsqueeze(0)

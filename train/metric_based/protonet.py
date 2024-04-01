@@ -38,9 +38,8 @@ def protonet_step(P, step, model, criterion, optimizer, batch, metric_logger, lo
 
     prototypes = get_prototypes(train_embeddings, train_targets, num_ways)
     
-    squared_distances = torch.sum((prototypes.unsqueeze(2)
-                                - test_embeddings.unsqueeze(1)) ** 2, dim=-1)
-    loss = criterion(-squared_distances, test_targets)
+    manhattan_distances = torch.sum(torch.abs(prototypes.unsqueeze(2) - test_embeddings.unsqueeze(1)), dim=-1)
+    loss = criterion(-manhattan_distances, test_targets)
 
     """ outer gradient step """
     optimizer.zero_grad()

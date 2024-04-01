@@ -77,6 +77,6 @@ def prototypical_loss(prototypes, embeddings, targets, **kwargs):
     loss : `torch.FloatTensor` instance
         The negative log-likelihood on the query points.
     """
-    squared_distances = torch.sum((prototypes.unsqueeze(2)
-        - embeddings.unsqueeze(1)) ** 2, dim=-1)
-    return F.cross_entropy(-squared_distances, targets, **kwargs)
+    manhattan_distances = torch.sum(torch.abs(prototypes.unsqueeze(2)
+        - embeddings.unsqueeze(1)), dim=-1)
+    return F.cross_entropy(-manhattan_distances, targets, **kwargs)

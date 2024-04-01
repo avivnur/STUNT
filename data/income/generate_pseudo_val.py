@@ -1,23 +1,12 @@
 import numpy as np
-from sklearn.cluster import KMeans
+from sklearn_extra.cluster import CLARA
+from collections import Counter
 
 np.random.seed(0)
 
-x = np.load('xtrain.npy')
-y = np.load('ytrain.npy')
+x_val = np.load("x_val.npy")
 
-num_train = int(len(x) * 0.8)
-idx = np.random.permutation(len(x))
-train_idx = idx[:num_train]
-val_idx = idx[num_train:]
-
-train_x = x[train_idx]
-val_x = x[val_idx]
-
-np.save('train_x.npy', train_x)
-np.save('val_x.npy', val_x)
-
-model = KMeans(n_clusters = 2, n_init='auto')
-model.fit(val_x)
-labels = model.predict(val_x)
+km = CLARA(n_clusters=2, metric="manhattan", random_state=0).fit(x_val)
+labels = km.predict(x_val)
 np.save('pseudo_val_y.npy', labels)
+print(Counter(labels))
